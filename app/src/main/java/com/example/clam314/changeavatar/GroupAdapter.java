@@ -3,10 +3,15 @@ package com.example.clam314.changeavatar;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +60,23 @@ public class GroupAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView = new ImageView(activity);
-        Bitmap bitmap = BitmapFactory.decodeFile(imageList.get(position));
-        return imageView;
+        Halder hadler = null;
+        if(convertView == null){
+            convertView = View.inflate(activity,R.layout.item_image,null);
+            hadler = new Halder();
+            hadler.imageView = (ImageView)convertView.findViewById(R.id.image);
+            convertView.setTag(hadler);
+        }else {
+            hadler = (Halder)convertView.getTag();
+        }
+        int height = (int)activity.getResources().getDisplayMetrics().widthPixels/3;
+        AbsListView.LayoutParams params = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,height);
+        convertView.setLayoutParams(params);
+        ImageLoader.getInstance().displayImage("file://"+imageList.get(position),hadler.imageView,new DisplayImageOptions.Builder().cacheInMemory(true).build());
+        return convertView;
+    }
+
+    static class Halder{
+        ImageView imageView;
     }
 }

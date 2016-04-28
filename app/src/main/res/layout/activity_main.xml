@@ -8,6 +8,12 @@
         android:id="@+id/grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="3"/>
+        android:numColumns="3"
+        android:gravity="center"
+        android:columnWidth="@dimen/activity_horizontal_margin"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="3dp"
+        android:horizontalSpacing="3dp"
+        />
 
 </LinearLayout>

@@ -37,8 +37,9 @@ public class MainActivity extends AppCompatActivity {
                     //关闭进度条
                     mProgressDialog.dismiss();
 
-                    adapter = new GroupAdapter();
-//                    mGroupGridView.setAdapter(adapter);
+                    adapter = new GroupAdapter(MainActivity.this);
+                    mGroupGridView.setAdapter(adapter);
+                    adapter.setImageBeanList(subGroupOfImage(mGruopMap));
                     break;
             }
         }
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mGroupGridView = (GridView)findViewById(R.id.grid);
         initDate();
     }
 
