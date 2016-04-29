@@ -1,15 +1,29 @@
 package com.example.clam314.changeavatar;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.GridView;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,14 +32,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private HashMap<String, List<String>> mGruopMap = new HashMap<String, List<String>>();
     private List<ImageBean> list = new ArrayList<ImageBean>();
     private final static int SCAN_OK = 1;
     private ProgressDialog mProgressDialog;
     private GroupAdapter adapter;
+    private TextView title;
     private GridView mGroupGridView;
+    private PopupWindow popupWindow;
+    private FrameLayout frameLayout;
+    private View drawer;
+    private PopupWindowAdapter popupWindowAdapter;
 
     private Handler mHandler = new Handler(){
 
@@ -40,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     adapter = new GroupAdapter(MainActivity.this);
                     mGroupGridView.setAdapter(adapter);
                     adapter.setImageBeanList(subGroupOfImage(mGruopMap));
+                    adapter.notifyDataSetChanged();
                     break;
             }
         }
@@ -52,8 +72,116 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mGroupGridView = (GridView)findViewById(R.id.grid);
+
+
+
+        frameLayout = (FrameLayout)findViewById(R.id.scroll_list);
+        title = (TextView)findViewById(R.id.title);
+        title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                initPopupWindow();
+//                setWindowDark(true);
+//                popupWindow.showAsDropDown(v,0,20);
+                if (frameLayout.getVisibility() == View.VISIBLE) {
+                    exitAnim();
+                    return;
+                }
+                showFrameLayout();
+            }
+        });
         initDate();
     }
+
+
+
+    public void changeAlbum(List<String> album){
+        if(adapter != null){
+            adapter.setImageList(album);
+            adapter.notifyDataSetChanged();
+            exitAnim();
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        changeAlbum(popupWindowAdapter.getList().get(position).getImagesPath());
+    }
+
+    private void initPopupWindow(){
+        View drawer = View.inflate(this,R.layout.popupwindow,null);
+        ListView popupList = (ListView)drawer.findViewById(R.id.image_list);
+        popupWindowAdapter = new PopupWindowAdapter(this);
+        popupList.setAdapter(popupWindowAdapter);
+        popupList.setOnItemClickListener(this);
+        popupWindowAdapter.setList(subGroupOfImage(mGruopMap));
+        popupWindow = new PopupWindow(drawer, WindowManager.LayoutParams.MATCH_PARENT,
+                (int)(getResources().getDisplayMetrics().heightPixels*0.6));
+        popupWindow.setFocusable(true);
+
+        popupWindow.setBackgroundDrawable(new ColorDrawable());
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                setWindowDark(false);
+            }
+        });
+    }
+
+
+
+
+    private  void showFrameLayout(){
+        drawer = View.inflate(this,R.layout.popupwindow,null);
+        ListView popupList = (ListView)drawer.findViewById(R.id.image_list);
+        popupWindowAdapter = new PopupWindowAdapter(this);
+        popupList.setAdapter(popupWindowAdapter);
+        popupList.setOnItemClickListener(this);
+        popupWindowAdapter.setList(subGroupOfImage(mGruopMap));
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                (int)(getResources().getDisplayMetrics().heightPixels*0.6));
+        drawer.setLayoutParams(lp);
+        frameLayout.addView(drawer);
+        frameLayout.setVisibility(View.VISIBLE);
+        enterAnim();
+    }
+
+    private void enterAnim(){
+        ObjectAnimator.ofFloat(drawer,"translationY",-500f,dip2px(this,48f)).setDuration(250).start();
+    }
+
+    private void exitAnim(){
+        ObjectAnimator animator = ObjectAnimator.ofFloat(drawer, "translationY", dip2px(this,48f), -500f);
+        animator.setDuration(250);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                frameLayout.setVisibility(View.GONE);
+            }
+        });
+        animator.start();
+    }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK){
+            if(frameLayout.getVisibility() == View.VISIBLE){
+                exitAnim();
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    private void setWindowDark(boolean isDark){
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+//        lp.alpha = isDark ? 0.3f: 1f;
+        getWindow().setAttributes(lp);
+    }
+
 
 
     private void initDate(){
@@ -126,8 +254,11 @@ public class MainActivity extends AppCompatActivity {
             mImageBean.setImagesPath(value);
             list.add(mImageBean);
         }
-
         return list;
+    }
 
+    public static int dip2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
     }
 }

@@ -2,8 +2,7 @@ package com.example.clam314.changeavatar;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -24,6 +23,7 @@ public class GroupAdapter extends BaseAdapter {
     private Activity activity;
     private List<ImageBean> imageBeanList = new ArrayList<>();
     private List<String> imageList = new ArrayList<>();
+    private Halder hadler;
 
     public GroupAdapter(Activity activity) {
         this.activity = activity;
@@ -31,6 +31,16 @@ public class GroupAdapter extends BaseAdapter {
 
     public List<ImageBean> getImageBeanList() {
         return imageBeanList;
+    }
+
+    public List<String> getImageList() {
+        return imageList;
+    }
+
+    public void setImageList(List<String> imageList) {
+        if(imageList != null) {
+            this.imageList = imageList;
+        }
     }
 
     public void setImageBeanList(List<ImageBean> imageBeanList) {
@@ -60,21 +70,30 @@ public class GroupAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Halder hadler = null;
-        if(convertView == null){
-            convertView = View.inflate(activity,R.layout.item_image,null);
+        hadler = null;
+        if (convertView == null) {
+            convertView = View.inflate(activity, R.layout.item_image, null);
             hadler = new Halder();
             hadler.imageView = (ImageView)convertView.findViewById(R.id.image);
             convertView.setTag(hadler);
-        }else {
-            hadler = (Halder)convertView.getTag();
+        } else {
+            hadler = (Halder) convertView.getTag();
         }
-        int height = (int)activity.getResources().getDisplayMetrics().widthPixels/3;
-        AbsListView.LayoutParams params = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,height);
+        int height = (int) activity.getResources().getDisplayMetrics().widthPixels / 4;
+        AbsListView.LayoutParams params = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
         convertView.setLayoutParams(params);
-        ImageLoader.getInstance().displayImage("file://"+imageList.get(position),hadler.imageView,new DisplayImageOptions.Builder().cacheInMemory(true).build());
+
+        ImageLoader.getInstance().displayImage("file://" + imageList.get(position),
+                hadler.imageView,
+                new DisplayImageOptions.Builder()
+                        .showImageOnLoading(new ColorDrawable(255))
+                        .cacheInMemory(true)
+                        .cacheOnDisk(true)
+                        .bitmapConfig(Bitmap.Config.RGB_565)
+                        .build());
         return convertView;
     }
+
 
     static class Halder{
         ImageView imageView;

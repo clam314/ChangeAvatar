@@ -1,19 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     >
     <GridView
         android:id="@+id/grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="3"
+        android:layout_marginTop="48dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginLeft="3dp"
+        android:numColumns="4"
         android:gravity="center"
         android:columnWidth="@dimen/activity_horizontal_margin"
         android:stretchMode="columnWidth"
         android:verticalSpacing="3dp"
         android:horizontalSpacing="3dp"
         />
+    <FrameLayout
+        android:id="@+id/scroll_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="#333333"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@android:color/white">
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18dp"
+            android:text="相册"
+            android:layout_gravity="center"/>
+    </FrameLayout>
 
-</LinearLayout>
+</FrameLayout>
